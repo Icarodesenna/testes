@@ -1,4 +1,4 @@
---[[ SCRIPT UNIVERSAL DE DEBUG PARA ROBLOX
+--[[ SCRIPT By.icarosesenna DE DEBUG PARA ROBLOX
 Inclui:
 - ESP com distância
 - Infinite Jump
@@ -130,23 +130,20 @@ tpPointBtn.MouseButton1Click:Connect(function()
 end)
 tpPointBtn.Parent = scroll
 
--- Função para teletransporte a cada 5 segundos e pular a cada 1 segundo
 task.spawn(function()
 	while true do
-		task.wait(5) -- Teletransporta a cada 5 segundos
+		task.wait(5)
 		if tpPointAtivo and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-			local hrp = LocalPlayer.Character.HumanoidRootPart
-			hrp.CFrame = CFrame.new(tpPos)
+			LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(tpPos)
 		end
 	end
 end)
 
 task.spawn(function()
 	while true do
-		task.wait(1) -- Dê um pulo a cada 1 segundo
+		task.wait(1)
 		if tpPointAtivo and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-			local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-			humanoid:ChangeState("Jumping")
+			LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
 		end
 	end
 end)
@@ -183,7 +180,7 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
--- Auto coletar moedas
+-- Auto Coletar Moedas
 local collectBtn = createButton("Auto Coletar Moedas: OFF")
 collectBtn.MouseButton1Click:Connect(function()
 	autoCollect = not autoCollect
@@ -239,7 +236,7 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
--- Lista de jogadores para teleporte
+-- Lista de Jogadores para TP
 local tpBtn = createButton("Mostrar Jogadores")
 tpBtn.MouseButton1Click:Connect(function()
 	for _, c in pairs(scroll:GetChildren()) do
@@ -263,6 +260,17 @@ tpBtn.MouseButton1Click:Connect(function()
 	end
 end)
 tpBtn.Parent = scroll
+
+-- Assinatura "by.icarodesenna"
+local assinatura = Instance.new("TextLabel")
+assinatura.Size = UDim2.new(1, -10, 0, 20)
+assinatura.BackgroundTransparency = 1
+assinatura.TextColor3 = Color3.fromRGB(200, 200, 200)
+assinatura.Font = Enum.Font.SourceSansItalic
+assinatura.TextSize = 14
+assinatura.Text = "by.icarodesenna"
+assinatura.TextXAlignment = Enum.TextXAlignment.Center
+assinatura.Parent = scroll
 
 -- Atualiza o tamanho da rolagem
 RunService.RenderStepped:Connect(function()
