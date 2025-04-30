@@ -1,4 +1,4 @@
---[[ SCRIPT By.icarosesenna DE DEBUG PARA ROBLOX
+--[[ SCRIPT the floor is lava By.icarosesenna DE DEBUG PARA ROBLOX
 Inclui:
 - ESP com distância
 - Infinite Jump
