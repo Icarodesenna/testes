@@ -1,11 +1,12 @@
 --[[ SCRIPT UNIVERSAL DE DEBUG PARA ROBLOX
 Inclui:
 - ESP com distância
-- Lista rolável de jogadores para teleporte
 - Infinite Jump
 - Noclip
 - Auto Coletar Moedas
-- Speed com controle de velocidade
+- Speed com controle
+- TP Point fixo com teletransporte a cada 5 segundos
+- Lista de jogadores para teleporte
 --]]
 
 local Players = game:GetService("Players")
@@ -45,6 +46,9 @@ local function createButton(text)
 	btn.Font = Enum.Font.SourceSansBold
 	btn.TextSize = 14
 	btn.Text = text
+	btn.TextWrapped = true
+	btn.TextXAlignment = Enum.TextXAlignment.Center
+	btn.Position = UDim2.new(0, 5, 0, 0)
 	return btn
 end
 
@@ -59,7 +63,7 @@ local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 4)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Funções
+-- Variáveis
 local infJump = false
 local noclip = false
 local espOn = false
@@ -67,7 +71,10 @@ local autoCollect = false
 local espObjects = {}
 local speedEnabled = false
 local speedValue = 50
+local tpPointAtivo = false
+local tpPos = Vector3.new(37.9, 67.5, -526.5)
 
+-- Funções ESP
 local function clearESP()
 	for _, v in pairs(espObjects) do
 		if v and v.Parent then v:Destroy() end
@@ -101,7 +108,7 @@ local function addESP(p)
 	table.insert(espObjects, bb)
 end
 
--- Botões
+-- Botão ESP
 local espBtn = createButton("ESP: OFF")
 espBtn.MouseButton1Click:Connect(function()
 	espOn = not espOn
@@ -115,6 +122,36 @@ espBtn.MouseButton1Click:Connect(function()
 end)
 espBtn.Parent = scroll
 
+-- TP Point com toggle ON/OFF
+local tpPointBtn = createButton("TP Point: OFF")
+tpPointBtn.MouseButton1Click:Connect(function()
+	tpPointAtivo = not tpPointAtivo
+	tpPointBtn.Text = "TP Point: " .. (tpPointAtivo and "ON" or "OFF")
+end)
+tpPointBtn.Parent = scroll
+
+-- Função para teletransporte a cada 5 segundos e pular a cada 1 segundo
+task.spawn(function()
+	while true do
+		task.wait(5) -- Teletransporta a cada 5 segundos
+		if tpPointAtivo and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local hrp = LocalPlayer.Character.HumanoidRootPart
+			hrp.CFrame = CFrame.new(tpPos)
+		end
+	end
+end)
+
+task.spawn(function()
+	while true do
+		task.wait(1) -- Dê um pulo a cada 1 segundo
+		if tpPointAtivo and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+			local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+			humanoid:ChangeState("Jumping")
+		end
+	end
+end)
+
+-- Infinite Jump
 local infJumpBtn = createButton("Infinite Jump: OFF")
 infJumpBtn.MouseButton1Click:Connect(function()
 	infJump = not infJump
@@ -128,6 +165,7 @@ UIS.JumpRequest:Connect(function()
 	end
 end)
 
+-- Noclip
 local noclipBtn = createButton("Noclip: OFF")
 noclipBtn.MouseButton1Click:Connect(function()
 	noclip = not noclip
@@ -205,7 +243,7 @@ end)
 local tpBtn = createButton("Mostrar Jogadores")
 tpBtn.MouseButton1Click:Connect(function()
 	for _, c in pairs(scroll:GetChildren()) do
-		if c:IsA("TextButton") and not (c.Text:find(":") or c.Text:find("ON") or c.Text:find("OFF")) then
+		if c:IsA("TextButton") and not (c.Text:find(":") or c.Text:find("ON") or c.Text:find("OFF") or c == tpPointBtn) then
 			c:Destroy()
 		end
 	end
@@ -226,7 +264,7 @@ tpBtn.MouseButton1Click:Connect(function()
 end)
 tpBtn.Parent = scroll
 
--- Ajustar scroll
+-- Atualiza o tamanho da rolagem
 RunService.RenderStepped:Connect(function()
 	scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
 end)
