@@ -63,6 +63,7 @@ local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 4)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
+-- Variáveis
 local infJump = false
 local noclip = false
 local espOn = false
@@ -73,7 +74,7 @@ local speedValue = 50
 local tpPointAtivo = false
 local tpPos = Vector3.new(37.9, 67.5, -526.5)
 
--- ESP
+-- Funções ESP
 local function clearESP()
 	for _, v in pairs(espObjects) do
 		if v and v.Parent then v:Destroy() end
@@ -107,6 +108,7 @@ local function addESP(p)
 	table.insert(espObjects, bb)
 end
 
+-- Botão ESP
 local espBtn = createButton("ESP: OFF")
 espBtn.MouseButton1Click:Connect(function()
 	espOn = not espOn
@@ -120,6 +122,7 @@ espBtn.MouseButton1Click:Connect(function()
 end)
 espBtn.Parent = scroll
 
+-- TP Point com toggle ON/OFF
 local tpPointBtn = createButton("TP Point: OFF")
 tpPointBtn.MouseButton1Click:Connect(function()
 	tpPointAtivo = not tpPointAtivo
@@ -145,6 +148,7 @@ task.spawn(function()
 	end
 end)
 
+-- Infinite Jump
 local infJumpBtn = createButton("Infinite Jump: OFF")
 infJumpBtn.MouseButton1Click:Connect(function()
 	infJump = not infJump
@@ -158,6 +162,7 @@ UIS.JumpRequest:Connect(function()
 	end
 end)
 
+-- Noclip
 local noclipBtn = createButton("Noclip: OFF")
 noclipBtn.MouseButton1Click:Connect(function()
 	noclip = not noclip
@@ -175,6 +180,7 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
+-- Auto Coletar Moedas
 local collectBtn = createButton("Auto Coletar Moedas: OFF")
 collectBtn.MouseButton1Click:Connect(function()
 	autoCollect = not autoCollect
@@ -196,6 +202,7 @@ task.spawn(function()
 	end
 end)
 
+-- Speed
 local speedBtn = createButton("Speed: OFF")
 speedBtn.MouseButton1Click:Connect(function()
 	speedEnabled = not speedEnabled
@@ -229,6 +236,19 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
+-- WalkFling
+local walkflingAtivo = false
+local walkflingBtn = createButton("WalkFling: OFF")
+walkflingBtn.MouseButton1Click:Connect(function()
+	walkflingAtivo = not walkflingAtivo
+	walkflingBtn.Text = "WalkFling: " .. (walkflingAtivo and "ON" or "OFF")
+	if walkflingAtivo then
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/obf_rf6iQURzu1fqrytcnLBAvW34C9N55kS9g9G3CKz086rC47M6632sEd4ZZYB0AYgV.lua.txt"))()
+	end
+end)
+walkflingBtn.Parent = scroll
+
+-- Lista de Jogadores para TP
 local tpBtn = createButton("Mostrar Jogadores")
 tpBtn.MouseButton1Click:Connect(function()
 	for _, c in pairs(scroll:GetChildren()) do
@@ -253,14 +273,7 @@ tpBtn.MouseButton1Click:Connect(function()
 end)
 tpBtn.Parent = scroll
 
--- WalkFling com loadstring (ANTES da assinatura)
-local walkflingBtn = createButton("WalkFling")
-walkflingBtn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/obf_rf6iQURzu1fqrytcnLBAvW34C9N55kS9g9G3CKz086rC47M6632sEd4ZZYB0AYgV.lua.txt"))()
-end)
-walkflingBtn.Parent = scroll
-
--- Assinatura
+-- Assinatura "by.icarodesenna"
 local assinatura = Instance.new("TextLabel")
 assinatura.Size = UDim2.new(1, -10, 0, 20)
 assinatura.BackgroundTransparency = 1
@@ -271,7 +284,7 @@ assinatura.Text = "by.icarodesenna"
 assinatura.TextXAlignment = Enum.TextXAlignment.Center
 assinatura.Parent = scroll
 
--- Atualiza scroll
+-- Atualiza o tamanho da rolagem
 RunService.RenderStepped:Connect(function()
 	scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
 end)
