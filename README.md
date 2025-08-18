@@ -285,7 +285,7 @@ walkflingBtn.MouseButton1Click:Connect(function()
 	walkflingAtivo = not walkflingAtivo
 	walkflingBtn.Text = "WalkFling: " .. (walkflingAtivo and "ON" or "OFF")
 	if walkflingAtivo then
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Gui-45909"))()
 	end
 end)
 walkflingBtn.Parent = scroll
