@@ -1,5 +1,6 @@
 --[[ PAINEL DEBUG UNIVERSAL DE ROBLOX
 Inclui:
+- Tela de perfil inicial: mostra nome e foto do jogador, botão para abrir painel
 - Painel móvel para PC e celular
 - Botão para abrir/fechar painel
 - TP Point alternado: teleporta entre duas coordenadas a cada 5 segundos, ativado/desativado no botão TP Point
@@ -19,41 +20,78 @@ local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- UI
+-- Tela de Perfil Inicial
 local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "DebugGui"
+gui.Name = "DebugGuiPerfil"
 
+local perfilFrame = Instance.new("Frame", gui)
+perfilFrame.Position = UDim2.new(0.5, -125, 0.5, -100)
+perfilFrame.Size = UDim2.new(0, 250, 0, 180)
+perfilFrame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+perfilFrame.BorderSizePixel = 0
+
+local avatar = Instance.new("ImageLabel", perfilFrame)
+avatar.Size = UDim2.new(0, 80, 0, 80)
+avatar.Position = UDim2.new(0, 20, 0, 20)
+avatar.BackgroundTransparency = 1
+avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..LocalPlayer.UserId.."&width=180&height=180&format=png"
+
+local nomeLabel = Instance.new("TextLabel", perfilFrame)
+nomeLabel.Size = UDim2.new(0, 120, 0, 40)
+nomeLabel.Position = UDim2.new(0, 110, 0, 40)
+nomeLabel.BackgroundTransparency = 1
+nomeLabel.Text = LocalPlayer.Name
+nomeLabel.TextColor3 = Color3.new(1,1,1)
+nomeLabel.Font = Enum.Font.SourceSansBold
+nomeLabel.TextSize = 22
+nomeLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local abrirBtn = Instance.new("TextButton", perfilFrame)
+abrirBtn.Size = UDim2.new(0, 200, 0, 36)
+abrirBtn.Position = UDim2.new(0.5, -100, 1, -50)
+abrirBtn.BackgroundColor3 = Color3.fromRGB(70,130,180)
+abrirBtn.TextColor3 = Color3.new(1,1,1)
+abrirBtn.Font = Enum.Font.SourceSansBold
+abrirBtn.Text = "Abrir Painel"
+abrirBtn.TextSize = 20
+
+-- Painel principal (inicialmente oculto)
 local mainFrame = Instance.new("Frame", gui)
 mainFrame.Position = UDim2.new(0, 10, 0, 10)
 mainFrame.Size = UDim2.new(0, 230, 0, 300)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.Visible = false
 
+-- Botão para abrir/fechar painel
 local toggleGuiBtn = Instance.new("TextButton", gui)
 toggleGuiBtn.Position = UDim2.new(0, 10, 0, 10)
 toggleGuiBtn.Size = UDim2.new(0, 120, 0, 30)
 toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleGuiBtn.Text = "Abrir Interface"
+toggleGuiBtn.Text = "Fechar Painel"
 toggleGuiBtn.TextColor3 = Color3.new(1,1,1)
 toggleGuiBtn.Font = Enum.Font.SourceSansBold
 toggleGuiBtn.TextSize = 14
+toggleGuiBtn.Visible = false
 
+abrirBtn.MouseButton1Click:Connect(function()
+    perfilFrame.Visible = false
+    mainFrame.Visible = true
+    toggleGuiBtn.Visible = true
+end)
 toggleGuiBtn.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
-    toggleGuiBtn.Text = mainFrame.Visible and "Fechar Interface" or "Abrir Interface"
+    toggleGuiBtn.Text = mainFrame.Visible and "Fechar Painel" or "Abrir Painel"
 end)
 
 -- Mover painel (PC e celular)
 local dragging = false
 local dragStart, startPos
-
 local function update(input)
     local delta = input.Position - dragStart
     local newPos = startPos + UDim2.new(0, delta.X, 0, delta.Y)
     mainFrame.Position = newPos
     toggleGuiBtn.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset, newPos.Y.Scale, newPos.Y.Offset)
 end
-
 local function dragBegin(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
@@ -66,7 +104,6 @@ local function dragBegin(input)
         end)
     end
 end
-
 toggleGuiBtn.InputBegan:Connect(dragBegin)
 toggleGuiBtn.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
