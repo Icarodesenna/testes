@@ -288,12 +288,18 @@ walkflingBtn.MouseButton1Click:Connect(function()
 end)
 walkflingBtn.Parent = scroll
 
--- Fly (novo botão inserido)
-local flyBtn = createButton("Fly")
-flyBtn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+
+-- WalkFling
+local walkflingAtivo = false
+local walkflingBtn = createButton("Fly gui v3: OFF")
+walkflingBtn.MouseButton1Click:Connect(function()
+	walkflingAtivo = not walkflingAtivo
+	walkflingBtn.Text = "WalkFling: " .. (walkflingAtivo and "ON" or "OFF")
+	if walkflingAtivo then
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+	end
 end)
-flyBtn.Parent = scroll
+walkflingBtn.Parent = scroll
 
 -- Lista de Jogadores para TP (botão fixo e toggle)
 local tpBtn = createButton("Mostrar Jogadores")
