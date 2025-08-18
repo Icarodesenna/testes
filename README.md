@@ -250,7 +250,7 @@ walkflingBtn.Parent = scroll
 
 -- WalkFling
 local walkflingAtivo = false
-local walkflingBtn = createButton("WalkFling: OFF")
+local walkflingBtn = createButton("Fly gui v3: OFF")
 walkflingBtn.MouseButton1Click:Connect(function()
 	walkflingAtivo = not walkflingAtivo
 	walkflingBtn.Text = "WalkFling: " .. (walkflingAtivo and "ON" or "OFF")
