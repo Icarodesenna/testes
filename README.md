@@ -248,6 +248,18 @@ walkflingBtn.MouseButton1Click:Connect(function()
 end)
 walkflingBtn.Parent = scroll
 
+-- WalkFling
+local walkflingAtivo = false
+local walkflingBtn = createButton("WalkFling: OFF")
+walkflingBtn.MouseButton1Click:Connect(function()
+	walkflingAtivo = not walkflingAtivo
+	walkflingBtn.Text = "WalkFling: " .. (walkflingAtivo and "ON" or "OFF")
+	if walkflingAtivo then
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+	end
+end)
+walkflingBtn.Parent = scroll
+
 -- Lista de Jogadores para TP
 local tpBtn = createButton("Mostrar Jogadores")
 tpBtn.MouseButton1Click:Connect(function()
