@@ -1,13 +1,17 @@
---[[ SCRIPT UNIVERSAL DE DEBUG PARA ROBLOX
+--[[ PAINEL DEBUG UNIVERSAL DE ROBLOX
 Inclui:
+- Painel móvel para PC e celular
+- Botão para abrir/fechar painel
+- TP Point alternado: teleporta entre duas coordenadas a cada 5 segundos, ativado/desativado no botão TP Point
 - ESP com distância
 - Infinite Jump
 - Noclip
 - Auto Coletar Moedas
 - Speed com controle
-- TP Point fixo com teletransporte a cada 5 segundos
+- WalkFling
+- Fly
 - Lista de jogadores para teleporte (botão "Mostrar Jogadores" fixo, abre/fecha a lista)
-- Painel e botão móveis (arrastáveis no PC e celular)
+by.icarodesenna
 --]]
 
 local Players = game:GetService("Players")
@@ -15,7 +19,7 @@ local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- UI Principal
+-- UI
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "DebugGui"
 
@@ -39,7 +43,7 @@ toggleGuiBtn.MouseButton1Click:Connect(function()
     toggleGuiBtn.Text = mainFrame.Visible and "Fechar Interface" or "Abrir Interface"
 end)
 
--- MOVIMENTAÇÃO PARA CELULAR E PC
+-- Mover painel (PC e celular)
 local dragging = false
 local dragStart, startPos
 
@@ -64,20 +68,18 @@ local function dragBegin(input)
 end
 
 toggleGuiBtn.InputBegan:Connect(dragBegin)
-
 toggleGuiBtn.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
         update(input)
     end
 end)
-
 UIS.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
         update(input)
     end
 end)
 
--- Função para criar botões
+-- Criador de botões
 local function createButton(text)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -10, 0, 30)
@@ -103,25 +105,17 @@ local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0, 4)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Variáveis
-local infJump = false
-local noclip = false
+-- ESP
 local espOn = false
-local autoCollect = false
 local espObjects = {}
-local speedEnabled = false
-local speedValue = 50
-local tpPointAtivo = false
-local tpPos = Vector3.new(37.9, 67.5, -526.5)
-
--- Funções ESP
+local espBtn = createButton("ESP: OFF")
+espBtn.Parent = scroll
 local function clearESP()
     for _, v in pairs(espObjects) do
         if v and v.Parent then v:Destroy() end
     end
     espObjects = {}
 end
-
 local function addESP(p)
     if p == LocalPlayer then return end
     local bb = Instance.new("BillboardGui")
@@ -147,9 +141,6 @@ local function addESP(p)
     RunService.RenderStepped:Connect(update)
     table.insert(espObjects, bb)
 end
-
--- Botão ESP
-local espBtn = createButton("ESP: OFF")
 espBtn.MouseButton1Click:Connect(function()
     espOn = not espOn
     espBtn.Text = "ESP: " .. (espOn and "ON" or "OFF")
@@ -160,42 +151,42 @@ espBtn.MouseButton1Click:Connect(function()
         end
     end
 end)
-espBtn.Parent = scroll
 
--- TP Point com toggle ON/OFF
+-- TP Point alternando loop
+local tpPointAtivo = false
 local tpPointBtn = createButton("TP Point: OFF")
+tpPointBtn.Parent = scroll
+
+local coord1 = Vector3.new(13.955657, 64.454094, -405.709747)
+local coord2 = Vector3.new(37.9, 67.5, -526.5)
+task.spawn(function()
+    local atual = 1
+    while true do
+        if tpPointAtivo and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            if atual == 1 then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(coord1)
+                atual = 2
+            else
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(coord2)
+                atual = 1
+            end
+        end
+        task.wait(5)
+    end
+end)
 tpPointBtn.MouseButton1Click:Connect(function()
     tpPointAtivo = not tpPointAtivo
     tpPointBtn.Text = "TP Point: " .. (tpPointAtivo and "ON" or "OFF")
 end)
-tpPointBtn.Parent = scroll
-
-task.spawn(function()
-    while true do
-        task.wait(5)
-        if tpPointAtivo and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(tpPos)
-        end
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(1)
-        if tpPointAtivo and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-            LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-        end
-    end
-end)
 
 -- Infinite Jump
+local infJump = false
 local infJumpBtn = createButton("Infinite Jump: OFF")
+infJumpBtn.Parent = scroll
 infJumpBtn.MouseButton1Click:Connect(function()
     infJump = not infJump
     infJumpBtn.Text = "Infinite Jump: " .. (infJump and "ON" or "OFF")
 end)
-infJumpBtn.Parent = scroll
-
 UIS.JumpRequest:Connect(function()
     if infJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
         LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
@@ -203,13 +194,13 @@ UIS.JumpRequest:Connect(function()
 end)
 
 -- Noclip
+local noclip = false
 local noclipBtn = createButton("Noclip: OFF")
+noclipBtn.Parent = scroll
 noclipBtn.MouseButton1Click:Connect(function()
     noclip = not noclip
     noclipBtn.Text = "Noclip: " .. (noclip and "ON" or "OFF")
 end)
-noclipBtn.Parent = scroll
-
 RunService.Stepped:Connect(function()
     if noclip and LocalPlayer.Character then
         for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
@@ -221,13 +212,13 @@ RunService.Stepped:Connect(function()
 end)
 
 -- Auto Coletar Moedas
+local autoCollect = false
 local collectBtn = createButton("Auto Coletar Moedas: OFF")
+collectBtn.Parent = scroll
 collectBtn.MouseButton1Click:Connect(function()
     autoCollect = not autoCollect
     collectBtn.Text = "Auto Coletar Moedas: " .. (autoCollect and "ON" or "OFF")
 end)
-collectBtn.Parent = scroll
-
 task.spawn(function()
     while true do
         task.wait(0.5)
@@ -243,13 +234,14 @@ task.spawn(function()
 end)
 
 -- Speed
+local speedEnabled = false
+local speedValue = 50
 local speedBtn = createButton("Speed: OFF")
+speedBtn.Parent = scroll
 speedBtn.MouseButton1Click:Connect(function()
     speedEnabled = not speedEnabled
     speedBtn.Text = "Speed: " .. (speedEnabled and "ON" or "OFF")
 end)
-speedBtn.Parent = scroll
-
 local speedBox = Instance.new("TextBox")
 speedBox.Size = UDim2.new(1, -10, 0, 30)
 speedBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -260,14 +252,12 @@ speedBox.Text = tostring(speedValue)
 speedBox.ClearTextOnFocus = false
 speedBox.PlaceholderText = "Velocidade"
 speedBox.Parent = scroll
-
 speedBox.FocusLost:Connect(function()
     local val = tonumber(speedBox.Text)
     if val then
         speedValue = val
     end
 end)
-
 RunService.Stepped:Connect(function()
     if speedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
         LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speedValue
@@ -279,6 +269,7 @@ end)
 -- WalkFling
 local walkflingAtivo = false
 local walkflingBtn = createButton("WalkFling: OFF")
+walkflingBtn.Parent = scroll
 walkflingBtn.MouseButton1Click:Connect(function()
     walkflingAtivo = not walkflingAtivo
     walkflingBtn.Text = "WalkFling: " .. (walkflingAtivo and "ON" or "OFF")
@@ -286,8 +277,6 @@ walkflingBtn.MouseButton1Click:Connect(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/obf_rf6iQURzu1fqrytcnLBAvW34C9N55kS9g9G3CKz086rC47M6632sEd4ZZYB0AYgV.lua.txt"))()
     end
 end)
-walkflingBtn.Parent = scroll
-
 
 -- WalkFling
 local walkflingAtivo = false
@@ -301,29 +290,26 @@ walkflingBtn.MouseButton1Click:Connect(function()
 end)
 walkflingBtn.Parent = scroll
 
--- Lista de Jogadores para TP (botão fixo e toggle)
+-- Lista de Jogadores para TP (toggle)
 local tpBtn = createButton("Mostrar Jogadores")
 tpBtn.Name = "MostrarJogadoresBtn"
 tpBtn.Parent = scroll
-
 local function limparBotoesJogadores()
     for _, c in pairs(scroll:GetChildren()) do
-        if c:IsA("TextButton") and c.Name ~= "MostrarJogadoresBtn" and not (c.Text:find(":") or c.Text:find("ON") or c.Text:find("OFF") or c == tpPointBtn) then
+        if c:IsA("TextButton") and c.Name ~= "MostrarJogadoresBtn"
+        and c ~= tpPointBtn and c ~= espBtn and c ~= infJumpBtn
+        and c ~= noclipBtn and c ~= collectBtn and c ~= speedBtn and c ~= walkflingBtn and c ~= flyBtn then
             c:Destroy()
         end
     end
 end
-
 local listaAberta = false
-
 tpBtn.MouseButton1Click:Connect(function()
     if listaAberta then
-        -- Fecha lista
         limparBotoesJogadores()
         listaAberta = false
         tpBtn.Text = "Mostrar Jogadores"
     else
-        -- Abre lista
         limparBotoesJogadores()
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -344,7 +330,7 @@ tpBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Assinatura "by.icarodesenna"
+-- Assinatura
 local assinatura = Instance.new("TextLabel")
 assinatura.Size = UDim2.new(1, -10, 0, 20)
 assinatura.BackgroundTransparency = 1
@@ -355,7 +341,6 @@ assinatura.Text = "by.icarodesenna"
 assinatura.TextXAlignment = Enum.TextXAlignment.Center
 assinatura.Parent = scroll
 
--- Atualiza o tamanho da rolagem
 RunService.RenderStepped:Connect(function()
     scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
 end)
