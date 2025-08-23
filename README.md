@@ -303,15 +303,75 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- WalkFling
-local walkflingAtivo = false
+-- WalkFling antigo + pulse Infinite Jump + pulo forçado
+local walkflinging = false
 local walkflingBtn = createButton("WalkFling: OFF")
 walkflingBtn.Parent = scroll
+
+local walkFlingConn = nil
+local walkFlingSpawn = nil
+
+local function stopWalkFling()
+    walkflinging = false
+    if walkFlingConn then
+        walkFlingConn:Disconnect()
+        walkFlingConn = nil
+    end
+    if walkFlingSpawn then
+        walkFlingSpawn = nil
+    end
+end
+
+local function startWalkFling(char)
+    local Root = char:WaitForChild("HumanoidRootPart")
+    local Humanoid = char:WaitForChild("Humanoid")
+    
+    Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    Humanoid.BreakJointsOnDeath = false
+    
+    walkFlingConn = RunService.Stepped:Connect(function()
+        Humanoid.Health = math.huge
+        Humanoid.MaxHealth = math.huge
+    end)
+    
+    walkflinging = true
+    Root.CanCollide = false
+    Humanoid:ChangeState(11)
+    
+    walkFlingSpawn = spawn(function()
+        while walkflinging and Root and Root.Parent do
+            RunService.Heartbeat:Wait()
+            local vel = Root.Velocity
+            Root.Velocity = vel * 99999999 + Vector3.new(0, 99999999, 0)
+            RunService.RenderStepped:Wait()
+            Root.Velocity = vel
+            RunService.Stepped:Wait()
+            Root.Velocity = vel + Vector3.new(0, 0.1, 0)
+        end
+    end)
+end
+
 walkflingBtn.MouseButton1Click:Connect(function()
-    walkflingAtivo = not walkflingAtivo
-    walkflingBtn.Text = "WalkFling: " .. (walkflingAtivo and "ON" or "OFF")
-    if walkflingAtivo then
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/obf_rf6iQURzu1fqrytcnLBAvW34C9N55kS9g9G3CKz086rC47M6632sEd4ZZYB0AYgV.lua.txt"))()
+    walkflinging = not walkflinging
+    walkflingBtn.Text = "WalkFling: " .. (walkflinging and "ON" or "OFF")
+    if walkflinging then
+        -- Pulse Infinite Jump + pulo forçado
+        infJump = true
+        infJumpBtn.Text = "Infinite Jump: ON"
+        -- Força um pulo antes de desligar
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
+        task.wait(0.1)
+        infJump = false
+        infJumpBtn.Text = "Infinite Jump: OFF"
+        -- Inicia WalkFling
+        if LocalPlayer.Character then
+            startWalkFling(LocalPlayer.Character)
+        end
+        LocalPlayer.CharacterAdded:Connect(startWalkFling)
+    else
+        stopWalkFling()
     end
 end)
 
