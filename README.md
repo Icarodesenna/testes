@@ -352,7 +352,6 @@ walkflingBtn.MouseButton1Click:Connect(function()
 		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Gui-45909"))()
 	end
 end)
-walkflingBtn.Parent = scroll
 
 -- Speed
 local speedEnabled = false
