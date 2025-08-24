@@ -1,19 +1,5 @@
---[[ PAINEL DEBUG UNIVERSAL DE ROBLOX
-Inclui:
-- Tela de perfil inicial: mostra nome e foto do jogador, botão para abrir painel
-- Painel móvel para PC e celular
-- Botão para abrir/fechar painel
-- TP Point alternado: teleporta entre duas coordenadas a cada 5 segundos, ativado/desativado no botão TP Point
-- ESP com distância
-- Infinite Jump
-- Noclip
-- Auto Coletar Moedas
-- Speed com controle
-- WalkFling
-- Fly
-- Lista de jogadores para teleporte (botão "Mostrar Jogadores" fixo, abre/fecha a lista)
-by.icarodesenna
---]]
+-- PAINEL DEBUG UNIVERSAL DE ROBLOX + Headsit interativo
+-- by.icarodesenna
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -55,14 +41,12 @@ abrirBtn.Font = Enum.Font.SourceSansBold
 abrirBtn.Text = "Abrir Painel"
 abrirBtn.TextSize = 20
 
--- Painel principal (inicialmente oculto)
 local mainFrame = Instance.new("Frame", gui)
 mainFrame.Position = UDim2.new(0, 10, 0, 10)
 mainFrame.Size = UDim2.new(0, 230, 0, 300)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.Visible = false
 
--- Botão para abrir/fechar painel
 local toggleGuiBtn = Instance.new("TextButton", gui)
 toggleGuiBtn.Position = UDim2.new(0, 10, 0, 10)
 toggleGuiBtn.Size = UDim2.new(0, 120, 0, 30)
@@ -116,7 +100,6 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- Criador de botões
 local function createButton(text)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -10, 0, 30)
@@ -442,19 +425,15 @@ end
 local function startWalkFling(char)
     local Root = char:WaitForChild("HumanoidRootPart")
     local Humanoid = char:WaitForChild("Humanoid")
-    
     Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
     Humanoid.BreakJointsOnDeath = false
-    
     walkFlingConn = RunService.Stepped:Connect(function()
         Humanoid.Health = math.huge
         Humanoid.MaxHealth = math.huge
     end)
-    
     walkflinging = true
     Root.CanCollide = false
     Humanoid:ChangeState(11)
-    
     walkFlingSpawn = spawn(function()
         while walkflinging and Root and Root.Parent do
             RunService.Heartbeat:Wait()
@@ -472,23 +451,71 @@ walkflingBtn.MouseButton1Click:Connect(function()
     walkflinging = not walkflinging
     walkflingBtn.Text = "WalkFling: " .. (walkflinging and "ON" or "OFF")
     if walkflinging then
-        -- Pulse Infinite Jump + pulo forçado
         infJump = true
         infJumpBtn.Text = "Infinite Jump: ON"
-        -- Força um pulo antes de desligar
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
         end
         task.wait(0.1)
         infJump = false
         infJumpBtn.Text = "Infinite Jump: OFF"
-        -- Inicia WalkFling
         if LocalPlayer.Character then
             startWalkFling(LocalPlayer.Character)
         end
         LocalPlayer.CharacterAdded:Connect(startWalkFling)
     else
         stopWalkFling()
+    end
+end)
+
+-- HEADSIT INTERATIVO
+local headSitBtn = createButton("Headsit")
+headSitBtn.Name = "HeadsitBtn"
+headSitBtn.Parent = scroll
+
+local headsitListOpen = false
+local headSitConn = nil
+
+local function limparHeadsitLista()
+    for _, c in pairs(scroll:GetChildren()) do
+        if c:IsA("TextButton") and c.Name == "HeadsitPlayerBtn" then
+            c:Destroy()
+        end
+    end
+end
+
+local function headsitOn(targetPlayer)
+    if headSitConn then headSitConn:Disconnect() end
+    local speaker = LocalPlayer
+    local humanoid = speaker.Character and speaker.Character:FindFirstChildOfClass("Humanoid")
+    if not humanoid or not targetPlayer.Character or not getRoot(targetPlayer.Character) then return end
+    humanoid.Sit = true
+    headSitConn = RunService.Heartbeat:Connect(function()
+        if Players:FindFirstChild(targetPlayer.Name) and targetPlayer.Character and getRoot(targetPlayer.Character) and getRoot(speaker.Character) and humanoid.Sit == true then
+            getRoot(speaker.Character).CFrame = getRoot(targetPlayer.Character).CFrame * CFrame.Angles(0,math.rad(0),0)* CFrame.new(0,1.6,0.4)
+        else
+            if headSitConn then headSitConn:Disconnect() headSitConn = nil end
+        end
+    end)
+end
+
+headSitBtn.MouseButton1Click:Connect(function()
+    if headsitListOpen then return end
+    headsitListOpen = true
+    headSitBtn.Visible = false
+    limparHeadsitLista()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and getRoot(p.Character) then
+            local playerBtn = createButton("Headsit: " .. p.Name)
+            playerBtn.Name = "HeadsitPlayerBtn"
+            playerBtn.Parent = scroll
+            playerBtn.MouseButton1Click:Connect(function()
+                limparHeadsitLista()
+                headSitBtn.Visible = true
+                headsitListOpen = false
+                headsitOn(p)
+            end)
+        end
     end
 end)
 
@@ -500,7 +527,7 @@ local function limparBotoesJogadores()
     for _, c in pairs(scroll:GetChildren()) do
         if c:IsA("TextButton") and c.Name ~= "MostrarJogadoresBtn"
         and c ~= tpPointBtn and c ~= espBtn and c ~= infJumpBtn
-        and c ~= noclipBtn and c ~= collectBtn and c ~= speedBtn and c ~= walkflingBtn and c ~= flyBtn then
+        and c ~= noclipBtn and c ~= collectBtn and c ~= speedBtn and c ~= walkflingBtn and c ~= flyBtn and c ~= headSitBtn then
             c:Destroy()
         end
     end
@@ -532,7 +559,6 @@ tpBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Assinatura
 local assinatura = Instance.new("TextLabel")
 assinatura.Size = UDim2.new(1, -10, 0, 20)
 assinatura.BackgroundTransparency = 1
