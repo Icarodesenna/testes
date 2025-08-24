@@ -492,37 +492,6 @@ walkflingBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- HEADSIT INTERATIVO
-local headSitBtn = createButton("Headsit")
-headSitBtn.Name = "HeadsitBtn"
-headSitBtn.Parent = scroll
-
-local headsitListOpen = false
-local headSitConn = nil
-
-local function limparHeadsitLista()
-    for _, c in pairs(scroll:GetChildren()) do
-        if c:IsA("TextButton") and c.Name == "HeadsitPlayerBtn" then
-            c:Destroy()
-        end
-    end
-end
-
-local function headsitOn(targetPlayer)
-    if headSitConn then headSitConn:Disconnect() end
-    local speaker = LocalPlayer
-    local humanoid = speaker.Character and speaker.Character:FindFirstChildOfClass("Humanoid")
-    if not humanoid or not targetPlayer.Character or not getRoot(targetPlayer.Character) then return end
-    humanoid.Sit = true
-    headSitConn = RunService.Heartbeat:Connect(function()
-        if Players:FindFirstChild(targetPlayer.Name) and targetPlayer.Character and getRoot(targetPlayer.Character) and getRoot(speaker.Character) and humanoid.Sit == true then
-            getRoot(speaker.Character).CFrame = getRoot(targetPlayer.Character).CFrame * CFrame.Angles(0,math.rad(0),0)* CFrame.new(0,1.6,0.4)
-        else
-            if headSitConn then headSitConn:Disconnect() headSitConn = nil end
-        end
-    end)
-end
-
 -- Lista de Jogadores para TP (toggle)
 local tpBtn = createButton("Mostrar Jogadores")
 tpBtn.Name = "MostrarJogadoresBtn"
