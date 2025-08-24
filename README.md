@@ -492,22 +492,6 @@ walkflingBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- HEADSIT INTERATIVO
-local headSitBtn = createButton("Headsit")
-headSitBtn.Name = "HeadsitBtn"
-headSitBtn.Parent = scroll
-
-local headsitListOpen = false
-local headSitConn = nil
-
-local function limparHeadsitLista()
-    for _, c in pairs(scroll:GetChildren()) do
-        if c:IsA("TextButton") and c.Name == "HeadsitPlayerBtn" then
-            c:Destroy()
-        end
-    end
-end
-
 local function headsitOn(targetPlayer)
     if headSitConn then headSitConn:Disconnect() end
     local speaker = LocalPlayer
