@@ -270,15 +270,121 @@ task.spawn(function()
     end
 end)
 
--- WalkFling
-local walkflingAtivo = false
-local walkflingBtn = createButton("Fly gui v3: OFF")
-walkflingBtn.MouseButton1Click:Connect(function()
-	walkflingAtivo = not walkflingAtivo
-	walkflingBtn.Text = "WalkFling: " .. (walkflingAtivo and "ON" or "OFF")
-	if walkflingAtivo then
-		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-Gui-45909"))()
-	end
+-- Fly custom com pulso Infinite Jump ao desativar e pulo antes de desativar IJ
+local flyBtn = createButton("Fly: ON/OFF")
+flyBtn.Parent = scroll
+local FLYING = false
+local velocityHandlerName = "IyVelocityHandler"
+local gyroHandlerName = "IyGyroHandler"
+local iyflyspeed, vehicleflyspeed = 1, 1
+local IsOnMobile = UIS.TouchEnabled
+local QEfly = false
+local mfly1, mfly2
+local function getRoot(char)
+    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso")
+end
+local function unmobilefly(speaker)
+    FLYING = false
+    if mfly1 then mfly1:Disconnect() end
+    if mfly2 then mfly2:Disconnect() end
+    local root = getRoot(speaker.Character)
+    if root then
+        local vel = root:FindFirstChild(velocityHandlerName)
+        local gyro = root:FindFirstChild(gyroHandlerName)
+        if vel then vel:Destroy() end
+        if gyro then gyro:Destroy() end
+    end
+end
+local function mobilefly(speaker, vfly)
+	unmobilefly(speaker)
+	FLYING = true
+	local root = getRoot(speaker.Character)
+	local camera = workspace.CurrentCamera
+	local v3none = Vector3.new()
+	local v3zero = Vector3.new(0, 0, 0)
+	local v3inf = Vector3.new(9e9, 9e9, 9e9)
+	local controlModule = require(speaker.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+	local bv = Instance.new("BodyVelocity")
+	bv.Name = velocityHandlerName
+	bv.Parent = root
+	bv.MaxForce = v3zero
+	bv.Velocity = v3zero
+	local bg = Instance.new("BodyGyro")
+	bg.Name = gyroHandlerName
+	bg.Parent = root
+	bg.MaxTorque = v3inf
+	bg.P = 1000
+	bg.D = 50
+	mfly1 = speaker.CharacterAdded:Connect(function()
+		local bv = Instance.new("BodyVelocity")
+		bv.Name = velocityHandlerName
+		bv.Parent = root
+		bv.MaxForce = v3zero
+		bv.Velocity = v3zero
+		local bg = Instance.new("BodyGyro")
+		bg.Name = gyroHandlerName
+		bg.Parent = root
+		bg.MaxTorque = v3inf
+		bg.P = 1000
+		bg.D = 50
+	end)
+	mfly2 = RunService.RenderStepped:Connect(function()
+		root = getRoot(speaker.Character)
+		camera = workspace.CurrentCamera
+		if speaker.Character:FindFirstChildWhichIsA("Humanoid") and root and root:FindFirstChild(velocityHandlerName) and root:FindFirstChild(gyroHandlerName) then
+			local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+			local VelocityHandler = root:FindFirstChild(velocityHandlerName)
+			local GyroHandler = root:FindFirstChild(gyroHandlerName)
+			VelocityHandler.MaxForce = v3inf
+			GyroHandler.MaxTorque = v3inf
+			if not vfly then humanoid.PlatformStand = true end
+			GyroHandler.CFrame = camera.CoordinateFrame
+			VelocityHandler.Velocity = v3none
+			local direction = controlModule:GetMoveVector()
+			if direction.X > 0 then
+				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((vfly and vehicleflyspeed or iyflyspeed) * 50))
+			end
+			if direction.X < 0 then
+				VelocityHandler.Velocity = VelocityHandler.Velocity + camera.CFrame.RightVector * (direction.X * ((vfly and vehicleflyspeed or iyflyspeed) * 50))
+			end
+			if direction.Z > 0 then
+				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((vfly and vehicleflyspeed or iyflyspeed) * 50))
+			end
+			if direction.Z < 0 then
+				VelocityHandler.Velocity = VelocityHandler.Velocity - camera.CFrame.LookVector * (direction.Z * ((vfly and vehicleflyspeed or iyflyspeed) * 50))
+			end
+		end
+	end)
+end
+local function NOFLY()
+    FLYING = false
+    local root = getRoot(LocalPlayer.Character)
+    if root then
+        local vel = root:FindFirstChild(velocityHandlerName)
+        local gyro = root:FindFirstChild(gyroHandlerName)
+        if vel then vel:Destroy() end
+        if gyro then gyro:Destroy() end
+    end
+end
+local function sFLY(vfly)
+    NOFLY()
+    wait()
+    mobilefly(LocalPlayer, vfly)
+end
+flyBtn.MouseButton1Click:Connect(function()
+    if FLYING then
+        if not IsOnMobile then NOFLY() else unmobilefly(LocalPlayer) end
+        infJump = true
+        infJumpBtn.Text = "Infinite Jump: ON"
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
+        task.wait(0.1)
+        infJump = false
+        infJumpBtn.Text = "Infinite Jump: OFF"
+    else
+        if not IsOnMobile then sFLY() else mobilefly(LocalPlayer) end
+    end
 end)
 
 -- Speed
