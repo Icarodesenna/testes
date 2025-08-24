@@ -493,7 +493,6 @@ walkflingBtn.MouseButton1Click:Connect(function()
 end)
 
 -- HEADSIT INTERATIVO
--- HEADSIT INTERATIVO
 local headSitBtn = createButton("Headsit")
 headSitBtn.Name = "HeadsitBtn"
 headSitBtn.Parent = scroll
