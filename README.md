@@ -492,6 +492,22 @@ walkflingBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- HEADSIT INTERATIVO
+local headSitBtn = createButton("Headsit")
+headSitBtn.Name = "HeadsitBtn"
+headSitBtn.Parent = scroll
+
+local headsitListOpen = false
+local headSitConn = nil
+
+local function limparHeadsitLista()
+    for _, c in pairs(scroll:GetChildren()) do
+        if c:IsA("TextButton") and c.Name == "HeadsitPlayerBtn" then
+            c:Destroy()
+        end
+    end
+end
+
 local function headsitOn(targetPlayer)
     if headSitConn then headSitConn:Disconnect() end
     local speaker = LocalPlayer
@@ -507,26 +523,6 @@ local function headsitOn(targetPlayer)
     end)
 end
 
-headSitBtn.MouseButton1Click:Connect(function()
-    if headsitListOpen then return end
-    headsitListOpen = true
-    headSitBtn.Visible = false
-    limparHeadsitLista()
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character and getRoot(p.Character) then
-            local playerBtn = createButton("Headsit: " .. p.Name)
-            playerBtn.Name = "HeadsitPlayerBtn"
-            playerBtn.Parent = scroll
-            playerBtn.MouseButton1Click:Connect(function()
-                limparHeadsitLista()
-                headSitBtn.Visible = true
-                headsitListOpen = false
-                headsitOn(p)
-            end)
-        end
-    end
-end)
-
 -- Lista de Jogadores para TP (toggle)
 local tpBtn = createButton("Mostrar Jogadores")
 tpBtn.Name = "MostrarJogadoresBtn"
@@ -535,7 +531,7 @@ local function limparBotoesJogadores()
     for _, c in pairs(scroll:GetChildren()) do
         if c:IsA("TextButton") and c.Name ~= "MostrarJogadoresBtn"
         and c ~= tpPointBtn and c ~= espBtn and c ~= infJumpBtn
-        and c ~= noclipBtn and c ~= collectBtn and c ~= speedBtn and c ~= walkflingBtn and c ~= flyBtn and c ~= headSitBtn then
+        and c ~= noclipBtn and c ~= collectBtn and c ~= speedBtn and c ~= walkflingBtn and c ~= flyBtn then
             c:Destroy()
         end
     end
