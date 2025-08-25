@@ -9,7 +9,7 @@ Inclui:
 - Noclip
 - Auto Coletar Moedas
 - Speed com controle
-- WalkFling (custom: sem godmode/manipulação de vida, com pulse Infinite Jump e pulo forçado)
+- WalkFling (custom: sem godmode/manipulação de vida, com pulse Infinite Jump e pulo forçado, PERSISTENTE APÓS MORRER)
 - Fly
 - Lista de jogadores para teleporte (botão "Mostrar Jogadores" fixo, abre/fecha a lista)
 - Headsit interativo: botão mostra lista de jogadores, seleciona e senta na cabeça
@@ -377,7 +377,7 @@ flyBtn.MouseButton1Click:Connect(function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
         end
-        task.wait(0.1)
+        task.wait(0.4)
         infJump = false
         infJumpBtn.Text = "Infinite Jump: OFF"
     else
@@ -418,7 +418,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- WalkFling customizado (sem godmode/manipulação de vida, pulse Infinite Jump e pulo forçado)
+-- WalkFling customizado (PERSISTENTE APÓS MORRER)
 local walkflinging = false
 local walkflingBtn = createButton("WalkFling: OFF")
 walkflingBtn.Parent = scroll
@@ -428,15 +428,12 @@ local function stopWalkFling()
 end
 
 local function startWalkFling(char)
-    local Root = char:WaitForChild("HumanoidRootPart")
-    local Humanoid = char:WaitForChild("Humanoid")
-    
-    -- Removido: Godmode setup e manipulação de vida
+    local Root = char:FindFirstChild("HumanoidRootPart")
+    local Humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not Root or not Humanoid then return end
 
-    walkflinging = true
     Root.CanCollide = false
     Humanoid:ChangeState(11)
-    
     spawn(function()
         while walkflinging and Root and Root.Parent do
             RunService.Heartbeat:Wait()
@@ -450,23 +447,29 @@ local function startWalkFling(char)
     end)
 end
 
+local function handleCharacter(char)
+    if walkflinging then
+        startWalkFling(char)
+    end
+end
+
+LocalPlayer.CharacterAdded:Connect(handleCharacter)
+
 walkflingBtn.MouseButton1Click:Connect(function()
     walkflinging = not walkflinging
     walkflingBtn.Text = "WalkFling: " .. (walkflinging and "ON" or "OFF")
     if walkflinging then
-        -- Pulse Infinite Jump + pulo forçado (mantido)
         infJump = true
         infJumpBtn.Text = "Infinite Jump: ON"
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
         end
-        task.wait(0.1)
+        task.wait(0.3)
         infJump = false
         infJumpBtn.Text = "Infinite Jump: OFF"
         if LocalPlayer.Character then
             startWalkFling(LocalPlayer.Character)
         end
-        LocalPlayer.CharacterAdded:Connect(startWalkFling)
     else
         stopWalkFling()
     end
@@ -548,31 +551,4 @@ tpBtn.MouseButton1Click:Connect(function()
             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local dist = "N/A"
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    local d = (p.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                    dist = tostring(math.floor(d)) .. "m"
-                end
-                local playerBtn = createButton(p.Name .. " (" .. dist .. ")")
-                playerBtn.MouseButton1Click:Connect(function()
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(2, 0, 0)
-                end)
-                playerBtn.Parent = scroll
-            end
-        end
-        listaAberta = true
-        tpBtn.Text = "Fechar Jogadores"
-    end
-end)
-
-local assinatura = Instance.new("TextLabel")
-assinatura.Size = UDim2.new(1, -10, 0, 20)
-assinatura.BackgroundTransparency = 1
-assinatura.TextColor3 = Color3.fromRGB(200, 200, 200)
-assinatura.Font = Enum.Font.SourceSansItalic
-assinatura.TextSize = 14
-assinatura.Text = "by.icarodesenna"
-assinatura.TextXAlignment = Enum.TextXAlignment.Center
-assinatura.Parent = scroll
-
-RunService.RenderStepped:Connect(function()
-    scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
-end)
+                    local d = (p.Character.HumanoidRootPart.Position - LocalPlayer.Character.Huma
