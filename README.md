@@ -1,5 +1,20 @@
--- PAINEL DEBUG UNIVERSAL DE ROBLOX + Headsit interativo
--- by.icarodesenna
+--[[ PAINEL DEBUG UNIVERSAL DE ROBLOX
+Inclui:
+- Tela de perfil inicial: mostra nome e foto do jogador, botão para abrir painel
+- Painel móvel para PC e celular
+- Botão para abrir/fechar painel
+- TP Point alternado: teleporta entre duas coordenadas a cada 5 segundos, ativado/desativado no botão TP Point
+- ESP com distância
+- Infinite Jump
+- Noclip
+- Auto Coletar Moedas
+- Speed com controle
+- WalkFling (custom: sem godmode/manipulação de vida, com pulse Infinite Jump e pulo forçado)
+- Fly
+- Lista de jogadores para teleporte (botão "Mostrar Jogadores" fixo, abre/fecha a lista)
+- Headsit interativo: botão mostra lista de jogadores, seleciona e senta na cabeça
+by.icarodesenna
+--]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -403,38 +418,26 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- WalkFling antigo + pulse Infinite Jump + pulo forçado
+-- WalkFling customizado (sem godmode/manipulação de vida, pulse Infinite Jump e pulo forçado)
 local walkflinging = false
 local walkflingBtn = createButton("WalkFling: OFF")
 walkflingBtn.Parent = scroll
 
-local walkFlingConn = nil
-local walkFlingSpawn = nil
-
 local function stopWalkFling()
     walkflinging = false
-    if walkFlingConn then
-        walkFlingConn:Disconnect()
-        walkFlingConn = nil
-    end
-    if walkFlingSpawn then
-        walkFlingSpawn = nil
-    end
 end
 
 local function startWalkFling(char)
     local Root = char:WaitForChild("HumanoidRootPart")
     local Humanoid = char:WaitForChild("Humanoid")
-    Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-    Humanoid.BreakJointsOnDeath = false
-    walkFlingConn = RunService.Stepped:Connect(function()
-        Humanoid.Health = math.huge
-        Humanoid.MaxHealth = math.huge
-    end)
+    
+    -- Removido: Godmode setup e manipulação de vida
+
     walkflinging = true
     Root.CanCollide = false
     Humanoid:ChangeState(11)
-    walkFlingSpawn = spawn(function()
+    
+    spawn(function()
         while walkflinging and Root and Root.Parent do
             RunService.Heartbeat:Wait()
             local vel = Root.Velocity
@@ -451,6 +454,7 @@ walkflingBtn.MouseButton1Click:Connect(function()
     walkflinging = not walkflinging
     walkflingBtn.Text = "WalkFling: " .. (walkflinging and "ON" or "OFF")
     if walkflinging then
+        -- Pulse Infinite Jump + pulo forçado (mantido)
         infJump = true
         infJumpBtn.Text = "Infinite Jump: ON"
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
